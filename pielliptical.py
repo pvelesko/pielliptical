@@ -404,7 +404,7 @@ class RSCMeasurementChrc(Characteristic):
     #     if changed:
     #         rsc_speed = self.speed * 114.44
     #         self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': [ dbus.Byte(0x00), dbus.Byte(int(rsc_speed) & 0xff), dbus.Byte((int(rsc_speed) >> 8) & 0xff), dbus.Byte(int(self.spm) & 0xff) ] }, [])
-        sc_speed  = 1
+        rsc_speed  = 1
         self.spm = 123
         self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': [ dbus.Byte(0x00), dbus.Byte(int(rsc_speed) & 0xff), dbus.Byte((int(rsc_speed) >> 8) & 0xff), dbus.Byte(int(self.spm) & 0xff) ] }, [])
         return self.notifying
