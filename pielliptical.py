@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from random import random
 import dbus
 import dbus.exceptions
 import dbus.mainloop.glib
@@ -332,81 +333,81 @@ class RSCMeasurementChrc(Characteristic):
         # self.accelerometer = adafruit_adxl34x.ADXL345(i2c)
         # self.accelerometer.range = adafruit_adxl34x.Range.RANGE_4_G
         # self.accelerometer.enable_motion_detection(threshold=16)
-    #     self.stopped = True
-    #     self.moving = False
-    #     self.at_rest_counter = 0
-    #     self.changed_direction = False
-    #     self.starting_from_stopped = -1
-    #     self.t0 = milli_time()
-    #     self.max_acceleration = 0
-    #     self.speed = 0
-    #     self.spm = 0
-    #     Characteristic.__init__(
-    #             self, bus, index,
-    #             self.RSC_MSRMT_UUID,
-    #             ['notify', 'broadcast'],
-    #             service)
-    #     self.notifying = False
-    #     # change this to True to test elliptical speed without BLE connection
-    #     # and uncomment the following line
-    #     #GLib.timeout_add(10, self.rsc_msrmt_cb)
+        self.stopped = True
+        self.moving = False
+        self.at_rest_counter = 0
+        self.changed_direction = False
+        self.starting_from_stopped = -1
+        self.t0 = milli_time()
+        self.max_acceleration = 0
+        self.speed = 0
+        self.spm = 0
+        Characteristic.__init__(
+                self, bus, index,
+                self.RSC_MSRMT_UUID,
+                ['notify', 'broadcast'],
+                service)
+        self.notifying = False
+        # change this to True to test elliptical speed without BLE connection
+        # and uncomment the following line
+        #GLib.timeout_add(10, self.rsc_msrmt_cb)
 
-    # def rsc_msrmt_cb(self):
-    #     changed = False
-    #     if self.accelerometer.events['motion'] == False:
-    #         self.at_rest_counter += 1
-    #     if self.at_rest_counter == 20:
-    #         print('\033cstopped')
-    #         self.at_rest_counter += 1
-    #         self.starting_from_stopped = -1
-    #         self.speed = 0
-    #         self.spm = 0
-    #         changed = True
-    #     x_acceleration = self.accelerometer.acceleration[0]
-    #     if x_acceleration > self.max_acceleration:
-    #         self.max_acceleration = x_acceleration
-    #     if x_acceleration > self.STARTING:
-    #         self.at_rest_counter = 0
-    #         if self.changed_direction == True or self.stopped == True:
-    #             self.changed_direction = False
-    #             self.stopped = False
-    #     elif x_acceleration < self.STOPPING:
-    #         self.at_rest_counter = 0
-    #         if self.changed_direction == False:
-    #             self.changed_direction = True
-    #             self.stopped = False
-    #             t1 = milli_time()
-    #             if self.starting_from_stopped != 1:
-    #                 self.starting_from_stopped += 1
-    #             else:
-    #                 cadence = 60000 / (t1 - self.t0)
-    #                 # attempt to penalise low max_acceleration with high RPM
-    #                 self.speed = (cadence + (self.max_acceleration * 1.5)) / 18
-    #                 if self.speed < 0:
-    #                     self.speed = 0
-    #                 print('\033cSpeed: %.2f mph' % self.speed)
-    #                 print('Actual RPM: %d' % cadence)
-    #                 self.spm = int((120 + cadence * 8) / 6 )
-    #                 print('Simulated RPM: %d' % self.spm)
-    #                 changed = True
-    #             self.t0 = t1
-    #             self.max_acceleration = 0
-    #     elif self.speed != 0:
-    #         # last detected moving
-    #         t1 = milli_time()
-    #         if t1 - self.t0 > 2000:
-    #             # last seen moving >2 seconds ago, presumed stopped
-    #             self.spm = 0
-    #             self.speed = 0
-    #             changed = True
-    #             self.t0 = t1
-    #             print('\033cSpeed: 0 mph')
-    #     if changed:
-    #         rsc_speed = self.speed * 114.44
-    #         self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': [ dbus.Byte(0x00), dbus.Byte(int(rsc_speed) & 0xff), dbus.Byte((int(rsc_speed) >> 8) & 0xff), dbus.Byte(int(self.spm) & 0xff) ] }, [])
-        rsc_speed  = 1
-        self.spm = 123
-        self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': [ dbus.Byte(0x00), dbus.Byte(int(rsc_speed) & 0xff), dbus.Byte((int(rsc_speed) >> 8) & 0xff), dbus.Byte(int(self.spm) & 0xff) ] }, [])
+    def rsc_msrmt_cb(self):
+        changed = False
+        # if self.accelerometer.events['motion'] == False:
+        #     self.at_rest_counter += 1
+        if self.at_rest_counter == 20:
+            print('\033cstopped')
+            self.at_rest_counter += 1
+            self.starting_from_stopped = -1
+            self.speed = 0
+            self.spm = 0
+            changed = True
+        x_acceleration = random()
+        if x_acceleration > self.max_acceleration:
+            self.max_acceleration = x_acceleration
+        if x_acceleration > self.STARTING:
+            self.at_rest_counter = 0
+            if self.changed_direction == True or self.stopped == True:
+                self.changed_direction = False
+                self.stopped = False
+        elif x_acceleration < self.STOPPING:
+            self.at_rest_counter = 0
+            if self.changed_direction == False:
+                self.changed_direction = True
+                self.stopped = False
+                t1 = milli_time()
+                if self.starting_from_stopped != 1:
+                    self.starting_from_stopped += 1
+                else:
+                    cadence = 60000 / (t1 - self.t0)
+                    # attempt to penalise low max_acceleration with high RPM
+                    self.speed = (cadence + (self.max_acceleration * 1.5)) / 18
+                    if self.speed < 0:
+                        self.speed = 0
+                    print('\033cSpeed: %.2f mph' % self.speed)
+                    print('Actual RPM: %d' % cadence)
+                    self.spm = int((120 + cadence * 8) / 6 )
+                    print('Simulated RPM: %d' % self.spm)
+                    changed = True
+                self.t0 = t1
+                self.max_acceleration = 0
+        elif self.speed != 0:
+            # last detected moving
+            t1 = milli_time()
+            if t1 - self.t0 > 2000:
+                # last seen moving >2 seconds ago, presumed stopped
+                self.spm = 0
+                self.speed = 0
+                changed = True
+                self.t0 = t1
+                print('\033cSpeed: 0 mph')
+        if changed:
+            rsc_speed = self.speed * 114.44
+            self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': [ dbus.Byte(0x00), dbus.Byte(int(rsc_speed) & 0xff), dbus.Byte((int(rsc_speed) >> 8) & 0xff), dbus.Byte(int(self.spm) & 0xff) ] }, [])
+        # rsc_speed  = 1
+        # self.spm = 123
+        # self.PropertiesChanged(GATT_CHRC_IFACE, { 'Value': [ dbus.Byte(0x00), dbus.Byte(int(rsc_speed) & 0xff), dbus.Byte((int(rsc_speed) >> 8) & 0xff), dbus.Byte(int(self.spm) & 0xff) ] }, [])
         return self.notifying
 
     def _update_rsc_msrmt_simulation(self):
